@@ -1,0 +1,29 @@
+##############################################
+# Setting for running in Azure Spring Cloud  #
+##############################################
+spring:
+  boot:
+    admin:
+      ui:
+        public-url: "https://sbaserver.***.eastus.azurecontainerapps.io/"
+        #public-url: "https://***-sbaserver.azuremicroservices.io/"
+  security:
+    user:
+      name: "admin"
+      password: "******"
+
+###################################
+# Setting for running local test  #
+###################################
+#server:
+#  port: 8080
+#
+#spring:
+#  boot:
+#    admin:
+#      ui:
+#        public-url: "http://localhost:8080"
+#  security:
+#    user:
+#      name: "admin"
+#      password: "******"
