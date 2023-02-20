@@ -278,3 +278,5 @@ In this example, we will first create a sample Spring Boot Admin server applicat
   ![image](https://user-images.githubusercontent.com/90367028/220046028-b5feb488-f5ed-473d-94e1-867b596a60ba.png)
 
   ![image](https://user-images.githubusercontent.com/90367028/220046265-0a878e94-717b-4ecf-a1dc-57ff9ade4b43.png)
+
+  ![image](https://user-images.githubusercontent.com/90367028/220046927-dfd663bb-3284-40d5-8f13-1c1da1e8570d.png)
