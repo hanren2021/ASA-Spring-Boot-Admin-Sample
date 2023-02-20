@@ -234,8 +234,8 @@ In this example, we will first create a sample Spring Boot Admin server applicat
        management.endpoints.web.exposure.include=*
        spring.boot.admin.client.instance.name=sbaclient 
        spring.boot.admin.client.instance.management-base-url=<your sbaclient App URL>
-       spring.boot.admin.client.username=admin
-       spring.boot.admin.client.password=changeme
+       spring.boot.admin.client.username=<username>
+       spring.boot.admin.client.password=<password>
        ```
      
      **Example application.properties for your app running in local machine for test purpose:**
@@ -245,8 +245,8 @@ In this example, we will first create a sample Spring Boot Admin server applicat
      management.endpoints.web.exposure.include=*
      spring.boot.admin.client.instance.name=localsbaclient 
      spring.boot.admin.client.instance.management-base-url=http://localhost:8081
-     spring.boot.admin.client.username=myadmin
-     spring.boot.admin.client.password=changeme
+     spring.boot.admin.client.username=<username>
+     spring.boot.admin.client.password=<password>
      ```
      
    - Run Maven command to build the project
