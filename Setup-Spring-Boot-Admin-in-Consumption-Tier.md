@@ -34,27 +34,27 @@ In this example, we will first create a sample Spring Boot Admin server applicat
    - Click Dependencies and select **Spring Web** and **codecentric's Spring Boot Admin (Server)**.
    - Click Generate and download the resulting ZIP file, which is an archive of a web application that is configured with your choices.
 
-   ![image](https://user-images.githubusercontent.com/90367028/220031888-0fc31438-001b-4ad9-94dc-44bee901d701.png)
+   ![image](https://user-images.githubusercontent.com/90367028/230339889-9f3f8d2b-52db-4945-82b7-1f18e63c5e39.png)
    
    - Make sure the following dependency can be found in the pom.xml file
      ```
      <dependency>
 			  <groupId>de.codecentric</groupId>
 			  <artifactId>spring-boot-admin-starter-server</artifactId>
-		 </dependency>
+     </dependency>
      ```
    - If you need to secure your Spring Boot Admin with a login page, you also need to add the following dependency in your pom.xml file
      ```
      <dependency>
-			  <groupId>de.codecentric</groupId>
-			  <artifactId>spring-boot-admin-server-ui</artifactId>
-			  <version>${spring-boot-admin.version}</version>
-		 </dependency>
+		<groupId>de.codecentric</groupId>
+		<artifactId>spring-boot-admin-server-ui</artifactId>
+		<version>${spring-boot-admin.version}</version>
+     </dependency>
     
-		 <dependency>
-			  <groupId>org.springframework.boot</groupId>
-			  <artifactId>spring-boot-starter-security</artifactId>
-		 </dependency>
+     <dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-security</artifactId>
+     </dependency>
      ```
 
    - The top level of application class should look like the following.
@@ -128,8 +128,10 @@ In this example, we will first create a sample Spring Boot Admin server applicat
    - Create application.yml file under ./resources/ folder with the following contents
    
      **Example application.yml for your app running in Azure Spring Apps consumption tier:**
-       - Fill in your sbaserver App URL as the "public-url" value, which should like this: https://sbaserver.xxx.xxx.azurecontainerapps.io/
-       - Fill in yuor Spring boot Admin server access user name and password
+ 
+     - Fill in your sbaserver App URL as the "public-url" value, which should like this: https://sbaserver.[env-name].[region].azurecontainerapps.io/
+     - Fill in yuor Spring boot Admin server access user name and password
+       
      ```
      spring:
        boot:
@@ -172,13 +174,12 @@ In this example, we will first create a sample Spring Boot Admin server applicat
        --service <service-instance-name> `
        --name sbaserver `
        --artifact-path <file path to sbaserver-0.0.1-SNAPSHOT.jar> `
-       --runtime-version Java_17 `
-       --jvm-options '-Xms512m -Xmx800m'
+       --runtime-version Java_17
    ```
 
 - Test your sbaserver Azure Spring App
 
-  Navigate to https://sbaserver.xxx.xxx.azurecontainerapps.io/, the Spring Boot Admin server should pop up a login page.
+  Navigate to https://sbaserver.[env-name].[region].azurecontainerapps.io/, the Spring Boot Admin server should pop up a login page.
   
   ![image](https://user-images.githubusercontent.com/90367028/220039001-cfa0da33-cb2f-4bd8-a34c-1b20d6f85da0.png)
 
@@ -201,7 +202,7 @@ In this example, we will first create a sample Spring Boot Admin server applicat
       --assign-endpoint true
   ```
   After the app being successfully create, you should be able get the app URL like this: 
-  > https://sbaclient.xxx.xxx.azurecontainerapps.io/
+  > https://sbaclient.[env-name].[region].azurecontainerapps.io/
 
 
 - Build the Spring Boot Admin client project
@@ -225,15 +226,17 @@ In this example, we will first create a sample Spring Boot Admin server applicat
    - Create application.properties file under ./resources/ folder with the following contents
    
      **Example application.properties for your app running in Azure Spring Apps consumption tier:**
-       - Fill in your sbaserver App URL as the "spring.boot.admin.client.url" value, which should like this: https://sbaserver.xxx.xxx.azurecontainerapps.io/
-       - Fill in your sbaclient App URL as the "spring.boot.admin.client.instance.management-base-url" value, which should like this: https://sbaclient.xxx.xxx.azurecontainerapps.io:443
+       - Fill in your Spring Boot Admin server App URL as the "spring.boot.admin.client.url" value, which should like this: https://sbaserver.[env-name].[region].azurecontainerapps.io/
+       - Fill in your client App name as the "spring.boot.admin.client.instance.name" value. You can manuanlly set it as "sbaclient" or use environment variable: ${SPRING_APPLICATION_NAME}
        - Fill in spring.boot.admin.client.username and spring.boot.admin.client.password
+       - Set management.endpoints.web.exposure.include=* to expose all the available actuator endpoints. 
+       - Set spring.boot.admin.client.instance.prefer-ip=true to let Spring Boot Admin use the ip-address rather then the hostname in the monitor urls. 
       
        ```
-       spring.boot.admin.client.url=<your sbaserver App URL>
+       spring.boot.admin.client.url=<your Spring Boot Admin server App URL>
        management.endpoints.web.exposure.include=*
-       spring.boot.admin.client.instance.name=sbaclient 
-       spring.boot.admin.client.instance.management-base-url=<your sbaclient App URL>
+       spring.boot.admin.client.instance.name=${SPRING_APPLICATION_NAME} 
+       spring.boot.admin.client.instance.prefer-ip=true
        spring.boot.admin.client.username=<username>
        spring.boot.admin.client.password=<password>
        ```
@@ -241,9 +244,10 @@ In this example, we will first create a sample Spring Boot Admin server applicat
      **Example application.properties for your app running in local machine for test purpose:**
      ```
      server.port=8081
+     
      spring.boot.admin.client.url=http://localhost:8080
      management.endpoints.web.exposure.include=*
-     spring.boot.admin.client.instance.name=localsbaclient 
+     spring.boot.admin.client.instance.name=sbaclient 
      spring.boot.admin.client.instance.management-base-url=http://localhost:8081
      spring.boot.admin.client.username=<username>
      spring.boot.admin.client.password=<password>
@@ -262,21 +266,23 @@ In this example, we will first create a sample Spring Boot Admin server applicat
        --service <service-instance-name> `
        --name sbaclient `
        --artifact-path <file path to sbaclient-0.0.1-SNAPSHOT.jar> `
-       --runtime-version Java_17 `
-       --jvm-options '-Xms512m -Xmx800m'
+       --runtime-version Java_17
    ```
 
 - Test your sbaserver Azure Spring App
 
-  Navigate to https://sbaclient.xxx.xxx.azurecontainerapps.io/actuator/health, the client should report UP status.
+  Navigate to https://sbaclient.[env-name].[region].azurecontainerapps.io/actuator/health, the client should report UP status.
   
   ![image](https://user-images.githubusercontent.com/90367028/220045410-26eac213-6d9e-484a-8576-ffbd8d9ae275.png)
 
-  Navigate to https://sbaserver.xxx.xxx.azurecontainerapps.io/, and login with your username and password.
+  Navigate to https://sbaserver.[env-name].[region].azurecontainerapps.io/, and login with your username and password.
   
   You should be able to montior your client app with in the Spring Boot Admin server:
-  ![image](https://user-images.githubusercontent.com/90367028/220046028-b5feb488-f5ed-473d-94e1-867b596a60ba.png)
+  ![image](https://user-images.githubusercontent.com/90367028/230575726-58fc3cef-5d3d-4be7-af0f-92f303d56b84.png)
 
-  ![image](https://user-images.githubusercontent.com/90367028/220046265-0a878e94-717b-4ecf-a1dc-57ff9ade4b43.png)
+  ![image](https://user-images.githubusercontent.com/90367028/230577416-bb4ac913-02b9-45f6-9388-5821813bbd64.png)
 
   ![image](https://user-images.githubusercontent.com/90367028/220046927-dfd663bb-3284-40d5-8f13-1c1da1e8570d.png)
+  
+  ![image](https://user-images.githubusercontent.com/90367028/230577174-b3c2c101-31be-45f9-a45e-43457d8316a2.png)
+
