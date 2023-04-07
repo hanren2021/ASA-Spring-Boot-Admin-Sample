@@ -89,38 +89,38 @@ In this example, we will first create a sample Spring Boot Admin server applicat
 
      	@Configuration(proxyBeanMethods = false)
      	public static class SecuritySecureConfig {
+             private final String adminContextPath;
 
-     		private final AdminServerProperties adminServer;
+	     public SecuritySecureConfig(AdminServerProperties adminServerProperties) {
+			this.adminContextPath = adminServerProperties.getContextPath();
+	     }
+	     
+	     @Bean
+	     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		SavedRequestAwareAuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+		successHandler.setTargetUrlParameter("redirectTo");
+		successHandler.setDefaultTargetUrl(this.adminContextPath + "/");
 
-     		public SecuritySecureConfig(AdminServerProperties adminServer) {
-			this.adminServer = adminServer;
-		}
+		http.authorizeHttpRequests((authorizeRequests) -> authorizeRequests
+			.requestMatchers(new AntPathRequestMatcher(this.adminContextPath + "/assets/**"))
+			.permitAll()
+			.requestMatchers(new AntPathRequestMatcher(this.adminContextPath + "/login"))
+			.permitAll()
+			.anyRequest()
+			.authenticated())
+			.formLogin((formLogin) -> formLogin.loginPage(this.adminContextPath + "/login")
+				.successHandler(successHandler))
+			.logout((logout) -> logout.logoutUrl(this.adminContextPath + "/logout"))
+			.httpBasic(Customizer.withDefaults())
+			.csrf((csrf) -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+				.ignoringRequestMatchers(
+						new AntPathRequestMatcher(this.adminContextPath + "/instances", HttpMethod.POST.toString()),
+						new AntPathRequestMatcher(this.adminContextPath + "/instances/*",
+								HttpMethod.DELETE.toString()),
+						new AntPathRequestMatcher(this.adminContextPath + "/actuator/**")));
 
-		@Bean
-		protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-			SavedRequestAwareAuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
-			successHandler.setTargetUrlParameter("redirectTo");
-			successHandler.setDefaultTargetUrl(this.adminServer.path("/"));
-
-			http.authorizeHttpRequests((authorizeRequests) -> authorizeRequests
-					.requestMatchers(new AntPathRequestMatcher(this.adminServer.path("/assets/**"))).permitAll()
-					.requestMatchers(new AntPathRequestMatcher(this.adminServer.path("/login"))).permitAll()
-					.anyRequest().authenticated())
-
-					.formLogin((formLogin) -> formLogin.loginPage(this.adminServer.path("/login"))
-							.successHandler(successHandler))
-					.logout((logout) -> logout.logoutUrl(this.adminServer.path("/logout")))
-					.httpBasic(Customizer.withDefaults())
-					.csrf((csrf) -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-							.ignoringRequestMatchers(
-									new AntPathRequestMatcher(this.adminServer.path("/instances"),
-											HttpMethod.POST.toString()),
-									new AntPathRequestMatcher(this.adminServer.path("/instances/*"),
-											HttpMethod.DELETE.toString()),
-									new AntPathRequestMatcher(this.adminServer.path("/actuator/**"))));
-
-			return http.build();
-     		}
+		return http.build();
+	    }
      	}
      }
      ```
