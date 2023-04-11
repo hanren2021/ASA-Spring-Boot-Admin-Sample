@@ -1,18 +1,18 @@
-# Setup Spring Boot Admin in Consumption Tier
+# Setup Spring Boot Admin in Standard Consumption Plan
 
-This article shows you how to Setup Spring Boot Admin with Azure Spring Apps Consumption Tier.
+This article shows you how to Setup Spring Boot Admin with Azure Spring Apps Standard Consumption Plan.
 
 [Spring Boot Admin](https://github.com/codecentric/spring-boot-admin) is an open-source web application that provides a user interface to manage and monitor Spring Boot applications. It allows administrators to view important metrics such as CPU and memory usage, making it a valuable tool for monitoring the health and performance of Spring Boot applications.
 
 ## Prerequisites
 
-- An already provisioned Azure Spring Apps Consumption Tier service instance. For more information, see [Create Azure Spring Apps Consumption Plan](https://github.com/Azure/Azure-Spring-Apps-Consumption-Plan/blob/main/articles/create-asa-standard-gen2.md).
+- An already provisioned Azure Spring Apps Standard Consumption Plan service instance. For more information, see [Create Azure Spring Apps Consumption Plan](https://github.com/Azure/Azure-Spring-Apps-Consumption-Plan/blob/main/articles/create-asa-standard-gen2.md).
 - Install the [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) version 2.28.0 or higher.
 
 ## Deploy Spring Boot Admin Server in Azure Spring Apps
 In this example, we will first create a sample Spring Boot Admin server application, then deploy it to Azure Spring Apps instance.
 
-### Step 1: Create an App called "sbaserver" in the Azure Spring Apps Consumption Tier service instance
+### Step 1: Create an App called "sbaserver" in the Azure Spring Apps Standard Consumption Plan service instance
 
 - Use the following command to specify the app name on Azure Spring Apps as "sbaserver".
   ```
@@ -57,26 +57,8 @@ In this example, we will first create a sample Spring Boot Admin server applicat
      </dependency>
      ```
 
-   - The top level of application class should look like the following.
+   - The top level of application class should look like the following. We can pull in the Spring Boot Admin Server configuration via adding @EnableAdminServer to your configuration.
      ```
-     package com.sbaexample.sbaserver;
-
-     import org.springframework.boot.SpringApplication;
-     import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-     import org.springframework.boot.autoconfigure.SpringBootApplication;
-     import org.springframework.context.annotation.Bean;
-     import org.springframework.context.annotation.Configuration;
-     import org.springframework.http.HttpMethod;
-     import org.springframework.security.config.Customizer;
-     import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-     import org.springframework.security.web.SecurityFilterChain;
-     import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-     import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-     import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
-     import de.codecentric.boot.admin.server.config.AdminServerProperties;
-     import de.codecentric.boot.admin.server.config.EnableAdminServer;
-
      @SpringBootApplication
      @Configuration
      @EnableAutoConfiguration
@@ -86,51 +68,17 @@ In this example, we will first create a sample Spring Boot Admin server applicat
      	public static void main(String[] args) {
      		SpringApplication.run(SbaserverApplication.class, args);
      	}
-
-     	@Configuration(proxyBeanMethods = false)
-     	public static class SecuritySecureConfig {
-             private final String adminContextPath;
-
-	     public SecuritySecureConfig(AdminServerProperties adminServerProperties) {
-			this.adminContextPath = adminServerProperties.getContextPath();
-	     }
-	     
-	     @Bean
-	     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		SavedRequestAwareAuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
-		successHandler.setTargetUrlParameter("redirectTo");
-		successHandler.setDefaultTargetUrl(this.adminContextPath + "/");
-
-		http.authorizeHttpRequests((authorizeRequests) -> authorizeRequests
-			.requestMatchers(new AntPathRequestMatcher(this.adminContextPath + "/assets/**"))
-			.permitAll()
-			.requestMatchers(new AntPathRequestMatcher(this.adminContextPath + "/login"))
-			.permitAll()
-			.anyRequest()
-			.authenticated())
-			.formLogin((formLogin) -> formLogin.loginPage(this.adminContextPath + "/login")
-				.successHandler(successHandler))
-			.logout((logout) -> logout.logoutUrl(this.adminContextPath + "/logout"))
-			.httpBasic(Customizer.withDefaults())
-			.csrf((csrf) -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-				.ignoringRequestMatchers(
-						new AntPathRequestMatcher(this.adminContextPath + "/instances", HttpMethod.POST.toString()),
-						new AntPathRequestMatcher(this.adminContextPath + "/instances/*",
-								HttpMethod.DELETE.toString()),
-						new AntPathRequestMatcher(this.adminContextPath + "/actuator/**")));
-
-		return http.build();
-	    }
-     	}
      }
      ```
+     If you want to secure the Spring Boot Admin Server, please refer to [Securing Spring Boot Admin Server](https://codecentric.github.io/spring-boot-admin/2.5.1/#_securing_spring_boot_admin_server). Sample code can be found in [SecuritySecureConfig.java](https://github.com/codecentric/spring-boot-admin/blob/master/spring-boot-admin-samples/spring-boot-admin-sample-servlet/src/main/java/de/codecentric/boot/admin/SecuritySecureConfig.java)
+     
      
    - Create application.yml file under ./resources/ folder with the following contents
    
-     **Example application.yml for your app running in Azure Spring Apps consumption tier:**
+     **Example application.yml for your app running in Azure Spring Apps Standard Consumption Plan:**
  
      - Fill in your sbaserver App URL as the "public-url" value, which should like this: https://sbaserver.[env-name].[region].azurecontainerapps.io/
-     - Fill in yuor Spring boot Admin server access user name and password
+     - If you secured your Spring boot Admin server with user name and password, also fill in the access user name and password.
        
      ```
      spring:
@@ -179,7 +127,7 @@ In this example, we will first create a sample Spring Boot Admin server applicat
 
 - Test your sbaserver Azure Spring App
 
-  Navigate to https://sbaserver.[env-name].[region].azurecontainerapps.io/, the Spring Boot Admin server should pop up a login page.
+  Navigate to https://sbaserver.[env-name].[region].azurecontainerapps.io/, if you secured your Spring Boot Admin server in previouse step, the Spring Boot Admin server should pop up a login page. Otherwise, you can directly access it.
   
   ![image](https://user-images.githubusercontent.com/90367028/220039001-cfa0da33-cb2f-4bd8-a34c-1b20d6f85da0.png)
 
@@ -225,12 +173,12 @@ In this example, we will first create a sample Spring Boot Admin server applicat
    
    - Create application.properties file under ./resources/ folder with the following contents
    
-     **Example application.properties for your app running in Azure Spring Apps consumption tier:**
+     **Example application.properties for your app running in Azure Spring Apps Standard Consumption Plan:**
        - Fill in your Spring Boot Admin server App URL as the "spring.boot.admin.client.url" value, which should like this: https://sbaserver.[env-name].[region].azurecontainerapps.io/
        - Fill in your client App name as the "spring.boot.admin.client.instance.name" value. You can manuanlly set it as "sbaclient" or use environment variable: ${SPRING_APPLICATION_NAME}
-       - Fill in spring.boot.admin.client.username and spring.boot.admin.client.password
        - Set management.endpoints.web.exposure.include=* to expose all the available actuator endpoints. 
        - Set spring.boot.admin.client.instance.prefer-ip=true to let Spring Boot Admin use the ip-address rather then the hostname in the monitor urls. 
+       - If you secured your Spring Boot Admin server in Step 1, fill in spring.boot.admin.client.username and spring.boot.admin.client.password with the same username and password to allow the client access the admin server.
       
        ```
        spring.boot.admin.client.url=<your Spring Boot Admin server App URL>
