@@ -75,7 +75,7 @@ In this example, we will first create a sample Spring Boot Admin server applicat
      
    - Create application.yml file under ./resources/ folder with the following contents
    
-     **Example application.yml for your app running in Azure Spring Apps Standard Consumption Plan:**
+     **Example application.yml for your app running in Azure Spring Apps Standard consumption plan:**
  
      - Fill in your sbaserver App URL as the "public-url" value, which should like this: https://sbaserver.[env-name].[region].azurecontainerapps.io/
      - If you secured your Spring boot Admin server with user name and password, also fill in the access user name and password.
@@ -173,7 +173,7 @@ In this example, we will first create a sample Spring Boot Admin server applicat
    
    - Create application.properties file under ./resources/ folder with the following contents
    
-     **Example application.properties for your app running in Azure Spring Apps Standard Consumption Plan:**
+     **Example application.properties for your app running in Azure Spring Apps Standard consumption plan:**
        - Fill in your Spring Boot Admin server App URL as the "spring.boot.admin.client.url" value, which should like this: https://sbaserver.[env-name].[region].azurecontainerapps.io/
        - Fill in your client App name as the "spring.boot.admin.client.instance.name" value. You can manuanlly set it as "sbaclient" or use environment variable: ${SPRING_APPLICATION_NAME}
        - Set management.endpoints.web.exposure.include=* to expose all the available actuator endpoints. 
